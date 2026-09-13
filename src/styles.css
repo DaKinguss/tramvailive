@@ -1,0 +1,210 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+@theme {
+  --color-bg: #090a0c;
+  --color-surface: #13151a;
+  --color-surface-2: #1b1e26;
+  --color-fg: #f2f0ea;
+  --color-muted: #8b909c;
+  --color-subtle: #5c616c;
+  --color-border: rgb(242 240 234 / 10%);
+  --color-border-strong: rgb(242 240 234 / 18%);
+  --color-accent: #c9d0dc;
+  --color-accent-fg: #090a0c;
+  --color-tram: #e3a900;
+  --color-tram-fg: #1a1400;
+  --color-live: #3ddc97;
+  --color-danger: #ff6b6b;
+  --color-warn: #e3a900;
+
+  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-sheet: 22px;
+
+  --shadow-panel: 0 0 0 1px rgb(255 255 255 / 8%), 0 18px 40px rgb(0 0 0 / 45%);
+  --ease-smooth-out: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@keyframes pulse-live {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.72);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.live-dot {
+  background: var(--color-live);
+  width: 7px;
+  height: 7px;
+  animation: pulse-live 1.6s var(--ease-smooth-out, ease) infinite;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgb(61 220 151 / 18%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
+}
+
+.maplibregl-ctrl-attrib {
+  color: var(--color-muted) !important;
+  background: rgb(9 10 12 / 72%) !important;
+  font-size: 10px !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--color-accent) !important;
+}
+
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right {
+  margin-bottom: 8px;
+}
+
+.tram-marker {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  transform-origin: center center;
+}
+
+.tram-marker-inner {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--color-tram);
+  color: var(--color-tram-fg);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.03em;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 0 0 2px rgb(9 10 12 / 70%),
+    0 8px 16px rgb(0 0 0 / 40%);
+  position: relative;
+}
+
+.tram-marker-chevron {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 6px solid var(--color-tram);
+  transform: translateX(-50%);
+}
+
+.stop-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-fg);
+  box-shadow: 0 0 0 3px rgb(9 10 12 / 80%);
+}
+
+.sheet-shadow {
+  box-shadow: var(--shadow-panel);
+}
+
+.ios-blur {
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+  background: rgb(19 21 26 / 78%);
+}
+
+.place-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  --place: #f2f0ea;
+  --place-ink: #090a0c;
+}
+
+.place-label-badge {
+  background: var(--place);
+  color: var(--place-ink);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 6px 8px 5px;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 2px rgb(9 10 12 / 70%),
+    0 8px 18px rgb(0 0 0 / 45%);
+  white-space: nowrap;
+}
+
+.place-label-pin {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--place);
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 35%));
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tram TM" />
+  <meta name="theme-color" content="#090A0C" />
+  <title>Tram TM</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --bg: #090a0c;
+      --surface: #13151acc;
+      --fg: #f2f0ea;
+      --muted: #8b909c;
+      --mb: #3ddc97;
+      --mocioni: #a78bfa;
+      --maria: #ff5a5a;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, "SF Pro Text", "Segoe UI", sans-serif; overflow: hidden; }
+    #map { position: absolute; inset: 0; background: var(--bg); }
+    .top {
+      position: absolute; left: 12px; right: 12px; top: max(12px, env(safe-area-inset-top));
+      z-index: 500; border-radius: 22px; padding: 12px 14px;
+      background: var(--surface); -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+      box-shadow: 0 0 0 1px rgb(255 255 255 / 8%), 0 18px 40px rgb(0 0 0 / 45%);
+    }
+    .live { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+    .dot { width: 7px; height: 7px; border-radius: 99px; background: #3ddc97; box-shadow: 0 0 0 3px rgb(61 220 151 / 18%); }
+    h1 { margin: 4px 0 0; font-size: 22px; letter-spacing: -.03em; }
+    .count { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+    .legend {
+      position: absolute; left: 12px; bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 500; border-radius: 16px; padding: 10px 12px;
+      background: var(--surface); -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+      box-shadow: 0 0 0 1px rgb(255 255 255 / 8%), 0 18px 40px rgb(0 0 0 / 45%);
+      font-size: 11px; font-weight: 650; display: grid; gap: 7px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .tag { font-size: 9px; font-weight: 800; padding: 3px 5px; border-radius: 5px; letter-spacing: .04em; }
+    .place { display: flex; flex-direction: column; align-items: center; }
+    .badge { font-weight: 800; font-size: 12px; letter-spacing: .04em; padding: 6px 8px 5px; border-radius: 8px; box-shadow: 0 0 0 2px rgb(9 10 12 / 70%), 0 8px 18px rgb(0 0 0 / 45%); white-space: nowrap; }
+    .pin { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top-width: 7px; border-top-style: solid; }
+    .tram { width: 30px; height: 30px; border-radius: 10px; background: #e3a900; color: #1a1400; font-weight: 800; font-size: 13px; display: grid; place-items: center; box-shadow: 0 0 0 2px rgb(9 10 12 / 70%); }
+    .leaflet-control-attribution { background: rgb(9 10 12 / 72%) !important; color: var(--muted) !important; font-size: 10px !important; }
+    .leaflet-control-attribution a { color: #c9d0dc !important; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <header class="top">
+    <div class="live"><i class="dot"></i> LIVE</div>
+    <h1>Tram TM</h1>
+    <p class="count" id="status">Harta Timișoarei</p>
+  </header>
+  <aside class="legend">
+    <span><b class="tag" style="background:#3ddc97;color:#052e16">MB</b> Matei Basarab</span>
+    <span><b class="tag" style="background:#a78bfa;color:#1a1028">P.Mocioni</b> Piața Mocioni</span>
+    <span><b class="tag" style="background:#ff5a5a;color:#fff7f7">P.Maria</b> Piața Maria</span>
+    <span><b class="tag" style="background:#f2f0ea;color:#090a0c">CNB</b> Colegiul Național Bănățean</span>
+  </aside>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const KEY = "cb1_3fk0_1_c40c96719d53939eb11470e0";
+    const TRAMS = new Set(["1", "2", "4", "7", "8", "9"]);
+    const map = L.map("map", { zoomControl: false, attributionControl: true }).setView([45.756, 21.2287], 13.1);
+    L.tileLayer("https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png?key=" + KEY, {
+      attribution: "© OpenStreetMap © CARTO",
+      maxZoom: 20,
+      tileSize: 256,
+    }).addTo(map);
+
+    function place(lat, lng, text, bg, ink) {
+      const html = `<div class="place"><span class="badge" style="background:${bg};color:${ink}">${text}</span><span class="pin" style="border-top-color:${bg}"></span></div>`;
+      L.marker([lat, lng], { icon: L.divIcon({ className: "", html, iconSize: [1, 1], iconAnchor: [0, 24] }), interactive: false }).addTo(map);
+    }
+    place(45.76778, 21.21677, "MB", "#3ddc97", "#052e16");
+    place(45.74628, 21.21527, "P.Mocioni", "#a78bfa", "#1a1028");
+    place(45.74852, 21.21899, "P.Maria", "#ff5a5a", "#fff7f7");
+    place(45.74462, 21.2135, "CNB", "#f2f0ea", "#090a0c");
+
+    const markers = new Map();
+    async function tick() {
+      try {
+        const res = await fetch("https://live.stpt.ro/gtfs-vehicles.php", { cache: "no-store" });
+        if (!res.ok) throw new Error("stpt");
+        const json = await res.json();
+        const all = json?.data?.vehicles || [];
+        const list = all.filter((v) => TRAMS.has(String(v.route)) || String(v.routeId || "").startsWith("R_TV_"));
+        const seen = new Set();
+        for (const v of list) {
+          seen.add(v.id);
+          const el = `<div class="tram">${v.route}</div>`;
+          if (!markers.has(v.id)) {
+            markers.set(v.id, L.marker([v.lat, v.lng], { icon: L.divIcon({ className: "", html: el, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(map));
+          } else {
+            markers.get(v.id).setLatLng([v.lat, v.lng]);
+          }
+        }
+        for (const [id, m] of markers) {
+          if (!seen.has(id)) { map.removeLayer(m); markers.delete(id); }
+        }
+        document.getElementById("status").textContent = list.length === 1 ? "1 tramvai în traseu" : list.length + " tramvaie în traseu";
+      } catch {
+        document.getElementById("status").textContent = "Harta e gata. Tramvaiele live merg din aplicația publicată (Safari → Adaugă pe ecranul principal).";
+      }
+    }
+    tick();
+    setInterval(tick, 8000);
+  </script>
+</body>
+</html>
