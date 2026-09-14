@@ -189,10 +189,17 @@ export function LiveMap({
     if (!map || !mapReady || !network) return;
     const apply = () => {
       const source = map.getSource("tram-network") as { setData: (data: unknown) => void } | undefined;
-      if (!source) return;
       const features = selectedLine
         ? network.features.filter((f) => f.properties?.lineId === selectedLine)
         : network.features;
+      console.log("[DEBUG tram-network]", {
+        sourceFound: Boolean(source),
+        selectedLine,
+        totalNetworkFeatures: network.features.length,
+        filteredFeatures: features.length,
+        sampleCoords: features[0]?.geometry?.coordinates?.[0],
+      });
+      if (!source) return;
       source.setData({ type: "FeatureCollection", features });
     };
     apply();
