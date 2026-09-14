@@ -195,8 +195,7 @@ export function LiveMap({
         : network.features;
       source.setData({ type: "FeatureCollection", features });
     };
-    if (map.isStyleLoaded()) apply();
-    else map.once("load", apply);
+    apply();
   }, [network, selectedLine, mapReady]);
 
   useEffect(() => {
@@ -221,8 +220,7 @@ export function LiveMap({
         })),
       });
     };
-    if (map.isStyleLoaded()) apply();
-    else map.once("load", apply);
+    apply();
   }, [stops, selectedLine, mapReady]);
 
   useEffect(() => {
