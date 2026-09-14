@@ -111,6 +111,7 @@ export function LiveMap({
         attributionControl: { compact: true },
       });
       mapRef.current = map;
+      (window as unknown as { __map: unknown }).__map = map;
       map.on("load", () => {
         if (!map) return;
         map.resize();
