@@ -17,6 +17,7 @@
   --color-live: #3ddc97;
   --color-danger: #ff6b6b;
   --color-warn: #e3a900;
+  --color-glass: rgb(19 21 26 / 78%);
 
   --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -45,6 +46,7 @@
   --color-accent-fg: #f4f3ee;
   --color-live: #0e9d67;
   --color-danger: #c23b3b;
+  --color-glass: rgb(255 255 255 / 78%);
 }
 
 @layer base {
@@ -188,7 +190,7 @@
 .ios-blur {
   -webkit-backdrop-filter: blur(22px) saturate(140%);
   backdrop-filter: blur(22px) saturate(140%);
-  background: rgb(19 21 26 / 78%);
+  background: var(--color-glass);
 }
 
 .place-label {
